@@ -3,10 +3,12 @@ auth.onAuthStateChanged(user => {
   if (user)
   {
     // Get data
-    db.collection('guides').get()
-      .then(snapshot => {
-        setupGuides(snapshot.docs);
-        setupUI(user);
+    db.collection('guides').onSnapshot(snapshot => {
+      setupGuides(snapshot.docs);
+      setupUI(user);
+    })
+      .catch(err => {
+        console.log(err.message);
       });
   }
   else
@@ -16,7 +18,24 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+// Create new guide
+const createForm = document.querySelector('#create-form');
+createForm.addEventListener('submit', event => {
+  event.preventDefault();
 
+  db.collection('guides').add({
+    title: createForm['title'].value,
+    content: createForm['content'].value
+  })
+    .then(() => {
+      const modal = document.querySelector('#modal-create');
+      M.Modal.getInstance(modal).close();
+      createForm.reset();
+    })
+    .catch(err => {
+      console.log(err.message);
+    });
+});
 
 // Signup
 const signupForm = document.querySelector('#signup-form');
