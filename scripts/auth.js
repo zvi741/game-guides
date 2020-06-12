@@ -1,114 +1,100 @@
-// Add admin cloud function
+// add admin cloud function
 const adminForm = document.querySelector('.admin-actions');
-adminForm.addEventListener('submit', event => {
-  event.preventDefault();
+adminForm.addEventListener('submit', (e) => {
+  e.preventDefault();
 
   const adminEmail = document.querySelector('#admin-email').value;
   const addAdminRole = functions.httpsCallable('addAdminRole');
-  addAdminRole({ email: adminEmail })
-    .then(res => {
-      console.log(res);
-    });
+  addAdminRole({ email: adminEmail }).then(result => {
+    console.log(result);
+  });
 });
 
-// Listen to auth status change
+// listen for auth status changes
 auth.onAuthStateChanged(user => {
-  if (user !== null && user)
+  if (user)
   {
-    user.getIdTokenResult()
-      .then(idTokenResult => {
-        user.admin = idTokenResult.claims.admin;
-      });
+    user.getIdTokenResult().then(idTokenResult => {
+      user.admin = idTokenResult.claims.admin;
+      setupUI(user);
+    });
     db.collection('guides').onSnapshot(snapshot => {
       setupGuides(snapshot.docs);
-      setupUI(user);
     }, err => console.log(err.message));
   } else
   {
-    setupGuides([]);
     setupUI();
+    setupGuides([]);
   }
 });
 
-// Create new guide
+// create new guide
 const createForm = document.querySelector('#create-form');
-createForm.addEventListener('submit', event => {
-  event.preventDefault();
-
+createForm.addEventListener('submit', (e) => {
+  e.preventDefault();
   db.collection('guides').add({
-    title: createForm['title'].value,
-    content: createForm['content'].value
-  })
-    .then(() => {
-      const modal = document.querySelector('#modal-create');
-      M.Modal.getInstance(modal).close();
-      createForm.reset();
-    })
-    .catch(err => {
-      console.log(err.message);
-    });
+    title: createForm.title.value,
+    content: createForm.content.value
+  }).then(() => {
+    // close the create modal & reset form
+    const modal = document.querySelector('#modal-create');
+    M.Modal.getInstance(modal).close();
+    createForm.reset();
+  }).catch(err => {
+    console.log(err.message);
+  });
 });
 
-// Signup
+// signup
 const signupForm = document.querySelector('#signup-form');
-signupForm.addEventListener('submit', event => {
-  event.preventDefault();
+signupForm.addEventListener('submit', (e) => {
+  e.preventDefault();
 
-  // Get user info from form
+  // get user info
   const email = signupForm['signup-email'].value;
   const password = signupForm['signup-password'].value;
 
-  // Sign up user
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(cred => {
-      if (cred)
-      {
-        console.log(cred);
-        return db.collection('users').doc(cred.user.uid).set({
-          bio: signupForm['signup-bio'].value
-        });
-      }
-    })
-    .then(() => {
-      const modal = document.querySelector('#modal-signup');
-      M.Modal.getInstance(modal).close();
-      signupForm.reset();
-      signupForm.querySelector('.error').innerHTML = '';
-    })
-    .catch(err => {
-      signupForm.querySelector('.error').innerHTML = err.message;
+  // sign up the user & add firestore data
+  auth.createUserWithEmailAndPassword(email, password).then(cred => {
+    return db.collection('users').doc(cred.user.uid).set({
+      bio: signupForm['signup-bio'].value
     });
+  }).then(() => {
+    // close the signup modal & reset form
+    const modal = document.querySelector('#modal-signup');
+    M.Modal.getInstance(modal).close();
+    signupForm.reset();
+    signupForm.querySelector('.error').innerHTML = '';
+  }).catch(err => {
+    signupForm.querySelector('.error').innerHTML = err.message;
+  });
 });
 
-
-// Logout
+// logout
 const logout = document.querySelector('#logout');
-logout.addEventListener('click', event => {
-  event.preventDefault();
+logout.addEventListener('click', (e) => {
+  e.preventDefault();
   auth.signOut();
 });
 
-// Login 
+// login
 const loginForm = document.querySelector('#login-form');
-loginForm.addEventListener('submit', event => {
-  event.preventDefault();
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
 
-  // Get user info from form
+  // get user info
   const email = loginForm['login-email'].value;
   const password = loginForm['login-password'].value;
 
-  // Sign In user
-  auth.signInWithEmailAndPassword(email, password)
-    .then(cred => {
+  // log the user in
+  auth.signInWithEmailAndPassword(email, password).then((cred) => {
+    // close the signup modal & reset form
+    const modal = document.querySelector('#modal-login');
+    M.Modal.getInstance(modal).close();
+    loginForm.reset();
+    loginForm.querySelector('.error').innerHTML = '';
+  }).catch(err => {
+    loginForm.querySelector('.error').innerHTML = err.message;
+  });
 
-      // Close the login modal and reset the form
-      const modal = document.querySelector('#modal-login');
-      M.Modal.getInstance(modal).close();
-      loginForm.reset();
-      loginForm.querySelector('.error').innerHTML = '';
-    })
-    .catch(err => {
-      loginForm.querySelector('.error').innerHTML = err.message;
-    });
 });
-
