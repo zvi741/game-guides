@@ -5,7 +5,8 @@ const accountDetails = document.querySelector('.account-details');
 
 // Setup UI
 const setupUI = (user) => {
-  if (user)
+  console.log(user);
+  if (user !== null && user)
   {
     // Show account info
     db.collection('users').doc(user.uid).get()
@@ -33,7 +34,7 @@ const setupGuides = (data) => {
 
   if (data.length)
   {
-
+    console.log('index 36: ');
     let html = '';
     data.forEach(doc => {
       const guide = doc.data();
