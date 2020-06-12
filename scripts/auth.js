@@ -1,8 +1,20 @@
+// Add admin cloud function
+const adminForm = document.querySelector('.admin-actions');
+adminForm.addEventListener('submit', event => {
+  event.preventDefault();
+
+  const adminEmail = document.querySelector('#admin-email').value;
+  const addAdminRole = functions.httpsCallable('addAdminRole');
+  addAdminRole({ email: adminEmail })
+    .then(res => {
+      console.log(res);
+    });
+});
+
 // Listen to auth status change
 auth.onAuthStateChanged(user => {
   if (user !== null && user)
   {
-    debugger;
     db.collection('guides').onSnapshot(snapshot => {
       setupGuides(snapshot.docs);
       setupUI(user);
