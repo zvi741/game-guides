@@ -61,17 +61,23 @@ signupForm.addEventListener('submit', event => {
   // Sign up user
   auth.createUserWithEmailAndPassword(email, password)
     .then(cred => {
-      console.log(cred);
-      return db.collection('users').doc(cred.user.uid).set({
-        bio: signupForm['signup-bio'].value
-      });
+      if (cred)
+      {
+        console.log(cred);
+        return db.collection('users').doc(cred.user.uid).set({
+          bio: signupForm['signup-bio'].value
+        });
+      }
     })
     .then(() => {
       const modal = document.querySelector('#modal-signup');
       M.Modal.getInstance(modal).close();
       signupForm.reset();
+      signupForm.querySelector('.error').innerHTML = '';
     })
-    .catch(err => console.log(err.message));
+    .catch(err => {
+      signupForm.querySelector('.error').innerHTML = err.message;
+    });
 });
 
 
@@ -99,6 +105,10 @@ loginForm.addEventListener('submit', event => {
       const modal = document.querySelector('#modal-login');
       M.Modal.getInstance(modal).close();
       loginForm.reset();
+      loginForm.querySelector('.error').innerHTML = '';
+    })
+    .catch(err => {
+      loginForm.querySelector('.error').innerHTML = err.message;
     });
 });
 
