@@ -1,6 +1,6 @@
 // Listen to auth status change
 auth.onAuthStateChanged(user => {
-  if (user)
+  if (user !== null)
   {
     db.collection('guides').onSnapshot(snapshot => {
       setupGuides(snapshot.docs);
@@ -8,8 +8,8 @@ auth.onAuthStateChanged(user => {
     }, err => console.log(err.message));
   } else
   {
-    setupUI();
     setupGuides([]);
+    setupUI();
   }
 });
 
@@ -44,6 +44,7 @@ signupForm.addEventListener('submit', event => {
   // Sign up user
   auth.createUserWithEmailAndPassword(email, password)
     .then(cred => {
+      console.log(cred);
       return db.collection('users').doc(cred.user.uid).set({
         bio: signupForm['signup-bio'].value
       });
@@ -52,7 +53,8 @@ signupForm.addEventListener('submit', event => {
       const modal = document.querySelector('#modal-signup');
       M.Modal.getInstance(modal).close();
       signupForm.reset();
-    });
+    })
+    .catch(err => console.log(err.message));
 });
 
 

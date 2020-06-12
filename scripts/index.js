@@ -16,9 +16,6 @@ const setupUI = (user) => {
         `;
         accountDetails.innerHTML = html;
       });
-
-
-    console.log(loggedInLinks);
     loggedInLinks.forEach(item => item.style.display = 'block');
     loggedOutLinks.forEach(item => item.style.display = 'none');
   }
@@ -40,7 +37,6 @@ const setupGuides = (data) => {
     let html = '';
     data.forEach(doc => {
       const guide = doc.data();
-      console.log(guide);
       const li = `
       <li>
       <div class="collapsible-header grey lighten-4">${guide.title}</div>
